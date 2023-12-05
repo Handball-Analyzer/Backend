@@ -19,6 +19,6 @@ public class AnalyzerApplication {
 class hello {
 	@RequestMapping("/")
 	String index(){
-		return "Neu String";
+		return "Dies ist das Backend für die Frontends Webfront und Backoffice";
 	}
 }
