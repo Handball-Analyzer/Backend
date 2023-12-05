@@ -2,6 +2,8 @@ package com.Handball.Anlazer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
 public class AnlazerApplication {
@@ -10,4 +12,11 @@ public class AnlazerApplication {
 		SpringApplication.run(AnlazerApplication.class, args);
 	}
 
+}
+@RestController
+class Hello{
+	@RequestMapping("/")
+	String index(){
+		return "Hello World";
+	}
 }
