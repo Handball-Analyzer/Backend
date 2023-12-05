@@ -1,10 +1,13 @@
-package com.Handball.Anlazer;
+package com.Handball.Analyzer;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class AnlazerApplicationTests {
+class AnalyzerApplicationTests {
 
+	@Test
+	void contextLoads() {
+	}
 
 }
