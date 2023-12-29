@@ -14,6 +14,7 @@ public class User {
     private UUID id;
     private String firstname;
     private String lastname;
+    @Column(unique = true)
     private String email;
     private String gender;
     private String password;
