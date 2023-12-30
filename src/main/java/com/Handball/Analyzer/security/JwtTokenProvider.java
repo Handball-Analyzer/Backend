@@ -1,8 +1,6 @@
 package com.Handball.Analyzer.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -13,6 +11,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.Date;
 
 @Component
@@ -54,8 +53,14 @@ public class JwtTokenProvider {
         try {
             Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             return true;
-        } catch (Exception e) {
-            System.out.println(e);
+        }  catch (MalformedJwtException ex) {
+            System.out.println("Invalid JWT token");
+        } catch (ExpiredJwtException ex) {
+            System.out.println("Expired JWT token");
+        } catch (UnsupportedJwtException ex) {
+            System.out.println("Unsupported JWT token");
+        } catch (IllegalArgumentException ex) {
+            System.out.println("JWT claims string is empty.");
         }
         return false;
     }
