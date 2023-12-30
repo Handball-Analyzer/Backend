@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/backoffice/v1/users")
+@RequestMapping("/backoffice/v1/clubs")
 public class ClubController {
 
     @Autowired

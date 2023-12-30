@@ -1,15 +1,18 @@
 package com.Handball.Analyzer.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 @Component
@@ -18,39 +21,41 @@ public class JwtTokenProvider {
     @Value("${app.jwtSecret}")
     private String jwtSecret;
 
-    public String generateToken(String userEmail) {
-        Instant now = Instant.now();
-        Instant experation = now.plus(1, ChronoUnit.DAYS);
 
+    public String generateToken(String userEmail) {
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + (100 * 60 * 60 * 12));
         return Jwts.builder()
-                .setSubject(userEmail)
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(experation))
-                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .subject(userEmail)
+                .issuedAt(now)
+                .expiration(expiration)
+                .signWith(key,Jwts.SIG.HS512)
                 .compact();
     }
-    public String generateToken(Authentication authentication){
+
+    public String generateToken(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
+
         return generateToken(user.getUsername());
     }
 
-    public String getUserMailFromToken(String token){
-        Claims claims = Jwts
-                .parser()
-                .setSigningKey(jwtSecret)
-                .parseClaimsJwt(token)
-                .getBody();
-        return claims.getSubject();
+    public String getUserMailFromToken(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        Jws<Claims> claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
+        Claims claimsBody = claims.getPayload();
+        return claimsBody.getSubject();
     }
 
 
     public boolean validateToken(String token) {
-
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJwt(token);
+            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
-
+            System.out.println(e);
         }
         return false;
     }

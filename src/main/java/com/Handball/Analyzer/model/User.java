@@ -1,5 +1,6 @@
 package com.Handball.Analyzer.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -17,6 +18,7 @@ public class User {
     @Column(unique = true)
     private String email;
     private String gender;
+    @JsonIgnore
     private String password;
     private String role;
     private Boolean active;
