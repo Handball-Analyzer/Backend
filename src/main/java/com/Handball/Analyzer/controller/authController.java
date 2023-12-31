@@ -6,11 +6,9 @@ import com.Handball.Analyzer.repository.UserRepository;
 import com.Handball.Analyzer.requestDtos.AuthRequest;
 import com.Handball.Analyzer.requestDtos.RegisterRequest;
 import com.Handball.Analyzer.security.JwtTokenProvider;
-import org.springframework.boot.autoconfigure.pulsar.PulsarProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -51,8 +49,8 @@ public class authController {
         User created = userRepository.save(newUser);
         return ResponseEntity.ok(created);
     }
-    @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AuthRequest authRequest){
+    @PostMapping("/webfront/login")
+    public ResponseEntity<String> webfrontLogin(@RequestBody AuthRequest authRequest){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequest.getEmail(),
@@ -60,5 +58,20 @@ public class authController {
                 )
         );
         return ResponseEntity.ok(jwtTokenProvider.generateToken(authentication));
+    }
+    @PostMapping("/backoffice/login")
+    public ResponseEntity<String> backofficeLogin(@RequestBody AuthRequest authRequest){
+
+        User user = userRepository.findByEmail(authRequest.getEmail()).orElseThrow();
+        if(user.getRole().equals("admin")) {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authRequest.getEmail(),
+                            authRequest.getPassword()
+                    )
+            );
+            return ResponseEntity.ok(jwtTokenProvider.generateToken(authentication));
+        }
+        return ResponseEntity.status(401).build();
     }
 }

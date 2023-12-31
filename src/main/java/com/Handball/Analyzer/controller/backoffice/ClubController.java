@@ -2,6 +2,7 @@ package com.Handball.Analyzer.controller.backoffice;
 
 import com.Handball.Analyzer.model.Club;
 import com.Handball.Analyzer.repository.ClubRepository;
+import com.Handball.Analyzer.requestDtos.webfront.createDtos.ClubCreateDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,31 +19,38 @@ public class ClubController {
     ClubRepository clubRepository;
 
     @GetMapping
-    public ResponseEntity<List<Club>> getAllClubs(){
+    public ResponseEntity<List<Club>> getAllClubs() {
         List<Club> clubList = clubRepository.findAll();
+        return ResponseEntity.ok(clubList);
 
-        if (clubList.isEmpty()){
-            return ResponseEntity.status(204).body(null);
-        }else {
-            return ResponseEntity.status(200).body(clubList);
-        }
     }
-    @GetMapping("/{userId}")
-    public ResponseEntity<Optional<Club>> getClubById(@PathVariable UUID clubId){
 
-        Optional<Club> club = clubRepository.findById(clubId);
-        if (club.isEmpty()){
-            return ResponseEntity.status(404).body(null);
-        }else {
-            return ResponseEntity.status(200).body(club);
+    @GetMapping("/{clubId}")
+    public ResponseEntity<Club> getClubById(@PathVariable UUID clubId) {
+
+        try {
+            Club club = clubRepository.findById(clubId).orElseThrow();
+            return ResponseEntity.ok(club);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
         }
+
     }
 
     @PostMapping
-    public ResponseEntity<?> createClub(@RequestBody Club club){
-        // TODO: Implement
-        return ResponseEntity.status(204).body(null);
+    public ResponseEntity<?> createClub(@RequestBody ClubCreateDto clubCreateDto) {
+
+        if (clubRepository.existsByName(clubCreateDto.getName())){
+            return ResponseEntity.badRequest().build();
+        }
+        Club club = new Club(clubCreateDto.getName(),clubCreateDto.getStreet(),clubCreateDto.getPlz(),clubCreateDto.getHousenumber(),clubCreateDto.getLocation());
+        clubRepository.save(club);
+        return ResponseEntity.ok(club);
     }
+
+
+
+
 
 
 
