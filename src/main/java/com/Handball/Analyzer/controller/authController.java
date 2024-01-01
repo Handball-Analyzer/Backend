@@ -11,10 +11,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -37,18 +34,7 @@ public class authController {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody RegisterRequest registerRequest) {
-        Optional<User> userOptional = userRepository.findByEmail(registerRequest.getEmail());
 
-        if (userOptional.isPresent()) {
-            return ResponseEntity.badRequest().build();
-        }
-        User newUser = new User(registerRequest.getFirstname(), registerRequest.getLastname(), registerRequest.getEmail(), registerRequest.getGender(), passwordEncoder.encode(registerRequest.getPassword()), "user", new Settings("de", "light", null, null), true);
-
-        User created = userRepository.save(newUser);
-        return ResponseEntity.ok(created);
-    }
     @PostMapping("/webfront/login")
     public ResponseEntity<String> webfrontLogin(@RequestBody AuthRequest authRequest){
         Authentication authentication = authenticationManager.authenticate(
@@ -61,17 +47,22 @@ public class authController {
     }
     @PostMapping("/backoffice/login")
     public ResponseEntity<String> backofficeLogin(@RequestBody AuthRequest authRequest){
-
         User user = userRepository.findByEmail(authRequest.getEmail()).orElseThrow();
         if(user.getRole().equals("admin")) {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            authRequest.getEmail(),
-                            authRequest.getPassword()
-                    )
-            );
-            return ResponseEntity.ok(jwtTokenProvider.generateToken(authentication));
+            try {
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                authRequest.getEmail(),
+                                authRequest.getPassword()
+                        )
+                );
+                return ResponseEntity.ok(jwtTokenProvider.generateToken(authentication));
+            }
+            catch (Exception e){
+                System.out.println(e);
+            }
+
         }
-        return ResponseEntity.status(401).build();
+        return ResponseEntity.badRequest().build();
     }
 }

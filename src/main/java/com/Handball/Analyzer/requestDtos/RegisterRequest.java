@@ -3,6 +3,8 @@ package com.Handball.Analyzer.requestDtos;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 public class RegisterRequest {
@@ -15,15 +17,16 @@ public class RegisterRequest {
 
     private String password;
 
-    private String gender;
+    private UUID clubId;
 
 
-    public RegisterRequest(String email, String firstname, String lastname, String password, String gender) {
+
+    public RegisterRequest(String email, String firstname, String lastname, String password, UUID clubId) {
         this.email = email;
         this.firstname = firstname;
         this.lastname = lastname;
         this.password = password;
-        this.gender = gender;
+        this.clubId = clubId;
     }
 
 
