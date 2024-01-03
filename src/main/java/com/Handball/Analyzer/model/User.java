@@ -1,6 +1,8 @@
 package com.Handball.Analyzer.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,10 +28,13 @@ public class User {
     private String password;
     private String role;
     private Boolean active;
+
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "settings_id", referencedColumnName = "id")
     private Settings settings;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private Set<ClubUser> clubUsers;
 
@@ -37,6 +42,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<Action> actions;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private Set<ConversationMember> conversationMembers;
 

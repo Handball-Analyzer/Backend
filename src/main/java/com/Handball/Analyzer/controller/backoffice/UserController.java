@@ -19,55 +19,57 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping ("/backoffice/v1/user")
+@RequestMapping("/backoffice/v1/user")
 public class UserController {
     @Autowired
     UserRepository userRepository;
-
+    @Autowired
     ClubRepository clubRepository;
+    @Autowired
 
     ClubUserRepository clubUserRepository;
 
     private PasswordEncoder passwordEncoder;
 
-    public UserController( PasswordEncoder passwordEncoder) {
+    public UserController(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllUsers(){
-        List<User> userList = userRepository.findAll();
-        return ResponseEntity.ok(userList);
+    public ResponseEntity<List<User>> getAllUsers() {
+        try {
+            List<User> userList = userRepository.findAll();
+            return ResponseEntity.ok(userList);
+        } catch (Exception e) {
+            System.out.println(e);
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
         System.out.println("sds");
 
-            if(userRepository.existsByEmail(registerRequest.getEmail())){
-                return ResponseEntity.badRequest().build();
-            }
-            User newUser = new User(registerRequest.getFirstname(), registerRequest.getLastname(), registerRequest.getEmail(),null, passwordEncoder.encode(registerRequest.getPassword()), "user", new Settings("de", "light", null, null), true);
-            User created = userRepository.save(newUser);
-        System.out.println(created);
-            if(registerRequest.getClubId() != null){
-                System.out.println("sdsdsd");
-                System.out.println(registerRequest.getClubId());
-                try {
-                    boolean test = clubRepository.existsById(registerRequest.getClubId());
-                    System.out.println(test);
-                    //Club club = clubRepository.findById(registerRequest.getClubId()).orElseThrow();
-
-                    //ClubUser clubUser = new ClubUser(created, club);
-                    return ResponseEntity.ok(created);
-                }catch (Exception e){
-                    return ResponseEntity.badRequest().build();
-                }
-
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            return ResponseEntity.badRequest().build();
+        }
+        User newUser = new User(registerRequest.getFirstname(), registerRequest.getLastname(), registerRequest.getEmail(), null, passwordEncoder.encode(registerRequest.getPassword()), "user", new Settings("de", "light", null, null), true);
+        User created = userRepository.save(newUser);
+        if (registerRequest.getClubId() != null) {
+            try {
+                //boolean test = clubRepository.existsById(registerRequest.getClubId());
+                Club club = clubRepository.findById(registerRequest.getClubId()).orElseThrow();
+                ClubUser clubUser = new ClubUser(created, club);
+                clubUserRepository.save(clubUser);
+                return ResponseEntity.ok(created);
+            } catch (Exception e) {
+                System.out.println(e);
+                return ResponseEntity.badRequest().body(e);
             }
 
-            return ResponseEntity.ok(created);
+        }
 
+        return ResponseEntity.ok(created);
 
 
     }
@@ -84,6 +86,7 @@ public class UserController {
         }
 
     }
+
     @PutMapping("/{userId}/password")
     public ResponseEntity<?> changePassword(@PathVariable UUID userId, @RequestBody String password) {
         String encodedPassword = passwordEncoder.encode(password);

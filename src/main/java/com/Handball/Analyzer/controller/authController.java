@@ -65,4 +65,12 @@ public class authController {
         }
         return ResponseEntity.badRequest().build();
     }
+
+//    @PostMapping("/register")
+//    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+//        User newUser = new User(registerRequest.getFirstname(), registerRequest.getLastname(), registerRequest.getEmail(), null, passwordEncoder.encode(registerRequest.getPassword()), "user", new Settings("de", "light", null, null), true);
+//        User created = userRepository.save(newUser);
+//
+//        return ResponseEntity.ok(created);
+//    }
 }
