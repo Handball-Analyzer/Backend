@@ -25,7 +25,6 @@ public class ClubDeatilController {
         for(ClubGym clubGym : clubGymList) {
             gymList.add(clubGym.getGym());
         }
-        System.out.println(gymList);
         return ResponseEntity.ok(gymList);
     }
 }

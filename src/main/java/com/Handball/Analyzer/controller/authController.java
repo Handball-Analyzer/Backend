@@ -37,40 +37,61 @@ public class authController {
 
     @PostMapping("/webfront/login")
     public ResponseEntity<String> webfrontLogin(@RequestBody AuthRequest authRequest){
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        authRequest.getEmail(),
-                        authRequest.getPassword()
-                )
-        );
-        return ResponseEntity.ok(jwtTokenProvider.generateToken(authentication));
+        try {
+            User user = userRepository.findByEmail(authRequest.getEmail()).orElseThrow();
+            if(user.getActive()) {
+                try {
+                    Authentication authentication = authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    authRequest.getEmail(),
+                                    authRequest.getPassword()
+                            )
+                    );
+                    return ResponseEntity.ok(jwtTokenProvider.generateToken(authentication));
+                }
+                catch (Exception e){
+                    return ResponseEntity.badRequest().build();
+                }
+
+
+            }
+            return ResponseEntity.status(401).build();
+        }catch (Exception e){
+            return ResponseEntity.notFound().build();
+        }
     }
     @PostMapping("/backoffice/login")
     public ResponseEntity<String> backofficeLogin(@RequestBody AuthRequest authRequest){
-        User user = userRepository.findByEmail(authRequest.getEmail()).orElseThrow();
-        if(user.getRole().equals("admin")) {
-            try {
-                Authentication authentication = authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                authRequest.getEmail(),
-                                authRequest.getPassword()
-                        )
-                );
-                return ResponseEntity.ok(jwtTokenProvider.generateToken(authentication));
-            }
-            catch (Exception e){
-                System.out.println(e);
-            }
+        try {
+            User user = userRepository.findByEmail(authRequest.getEmail()).orElseThrow();
+            if(user.getRole().equals("admin") && user.getActive()) {
+                try {
+                    Authentication authentication = authenticationManager.authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    authRequest.getEmail(),
+                                    authRequest.getPassword()
+                            )
+                    );
+                    return ResponseEntity.ok(jwtTokenProvider.generateToken(authentication));
+                }
+                catch (Exception e){
+                    return ResponseEntity.badRequest().build();
+                }
 
+
+            }
+            return ResponseEntity.status(401).build();
+        }catch (Exception e){
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.badRequest().build();
+
     }
 
-//    @PostMapping("/register")
-//    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
-//        User newUser = new User(registerRequest.getFirstname(), registerRequest.getLastname(), registerRequest.getEmail(), null, passwordEncoder.encode(registerRequest.getPassword()), "user", new Settings("de", "light", null, null), true);
-//        User created = userRepository.save(newUser);
-//
-//        return ResponseEntity.ok(created);
-//    }
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+        User newUser = new User(registerRequest.getFirstname(), registerRequest.getLastname(), registerRequest.getEmail(), null, passwordEncoder.encode(registerRequest.getPassword()), "user", new Settings("de", "light", null, null), true);
+        User created = userRepository.save(newUser);
+
+        return ResponseEntity.ok(created);
+    }
 }
