@@ -94,4 +94,10 @@ public class authController {
 
         return ResponseEntity.ok(created);
     }
+    @GetMapping("/imprint")
+    public ResponseEntity<?> imprint(){
+        String imprint = "Das ist ein Imprint";
+
+        return ResponseEntity.ok(imprint);
+    }
 }
